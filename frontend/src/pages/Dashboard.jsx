@@ -49,6 +49,24 @@ const Dashboard = () => {
             });
     }
 
+    function handleEdit(expenseId) {
+        // Navigate to edit page
+        window.location.href = `/edit-expense/${expenseId}`;
+    }
+
+    function handleDelete(expenseId) {
+        axios
+            .delete(`http://localhost:3000/api/expense/${expenseId}`, {
+                withCredentials: true
+            })
+            .then(() => {
+                setExpenses(expenses.filter(expense => expense.id !== expenseId));
+            })
+            .catch((error) => {
+                alert("Deleting expense failed. Please try again." + error);
+            });
+    }
+
     return (
         <div className="dashboard-container">
             <h3 className="dashboard-header">Welcome to your dashboard! Here you can track your expenses.</h3>
@@ -71,7 +89,10 @@ const Dashboard = () => {
                         <p>Name: {expense.name}</p>
                         <p>Price: {expense.price}</p>
                         <p>Date created: {expense.date}</p>
-                        <hr />
+                        <div className="expense-card-buttons">
+                            <button onClick={() => handleEdit(expense.id)}>Edit</button>
+                            <button onClick={() => handleDelete(expense.id)}>Delete</button>
+                        </div>
                     </div>
                 ))}
             </div>

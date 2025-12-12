@@ -97,20 +97,38 @@ export const updateExpense = (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-export const deleteExpense = (req: Request, res: Response, next: NextFunction) => {
+export const deleteExpense = async (request: Request, response: Response, next: NextFunction) => {
   try {
-    if (!req.params.id) {
-      res.status(400).json({ message: 'Item ID is required' });
+    if (!request.params.id) {
+      response.status(400).json({ message: 'Item ID is required' });
       return;
     }
-    const id = parseInt(req.params.id, 10);
-    // const itemIndex = items.findIndex((i) => i.id === id);
-    // if (itemIndex === -1) {
-    //   res.status(404).json({ message: 'Item not found' });
-    //   return;
-    // }
-    // const deletedItem = items.splice(itemIndex, 1)[0];
-    // res.json(deletedItem);
+    const id = parseInt(request.params.id);
+
+    // get user from session
+    const userId = request.session.userId;
+    if (!userId) {
+      return response.status(401).json({ message: "Not logged in" });
+    }
+
+    // verify expense belongs to user
+    const expenseToDelete = await expenseRepository.findOne({
+      where: { id },
+      relations: ["user_id"],
+    });
+    if (!expenseToDelete || expenseToDelete.user_id.id !== userId) {
+      return response.status(403).json({ message: "Forbidden" });
+    }
+
+    // get expense to delete
+    if (!expenseToDelete) {
+      response.status(404).json({ message: 'Expense not found' });
+      return;
+    }
+
+    await expenseRepository.remove(expenseToDelete);
+
+    response.status(204).send();
   } catch (error) {
     next(error);
   }
