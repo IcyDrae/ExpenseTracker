@@ -5,6 +5,8 @@
     "rootDir": "./src",
     "outDir": "./dist",
 
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
 
@@ -46,6 +48,6 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/types/**/*.d.ts"],
   "exclude": ["node_modules"]
 }
