@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import itemRoutes from './routes/itemRoutes';
 import authRoutes from './routes/authRoutes';
+import expenseRoutes from './routes/expenseRoutes';
 import { errorHandler } from './middlewares/errorHandler';
 import "reflect-metadata"
 import database from './database';
@@ -18,23 +19,22 @@ app.use(
 );
 
 // Session middleware
-app.use(
-  session({
-    secret: "super-secret-key", 
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: false, 
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
-    },
-  })
-);
+app.use(session({
+  secret: "your-secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60, // 1 hour
+    sameSite: "lax",
+    httpOnly: true,
+  }
+}));
 
 app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/expense', expenseRoutes);
 app.use('/api/items', itemRoutes);
 
 // Initialize database connection

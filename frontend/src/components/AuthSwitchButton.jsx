@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { UserContext } from "./UserContext";
 import axios from "axios";
 
@@ -7,7 +7,11 @@ export default function AuthSwitchButton() {
   const navigate = useNavigate();
   const location = useLocation();
   const path = location.pathname;
-  const { user, setUser } = useContext(UserContext);
+  const { user, setUser, refreshUser } = useContext(UserContext);
+
+  useEffect(() => {
+    refreshUser(); // make sure user is fetched when button mounts
+  }, []);
 
   const isLoginPage = path === "/login";
   const isSignupPage = path === "/";
