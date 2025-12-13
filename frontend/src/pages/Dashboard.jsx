@@ -1,10 +1,12 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import "./Dashboard.css";
 
 const Dashboard = () => {
     const [expenses, setExpenses] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get("http://localhost:3000/api/expense", { withCredentials: true })
@@ -13,7 +15,7 @@ const Dashboard = () => {
             })
             .catch((error) => {
                 console.error("Error fetching expenses data:", error);
-        });
+            });
     }, []);
 
     function createExpense(event) {
@@ -51,7 +53,7 @@ const Dashboard = () => {
 
     function handleEdit(expenseId) {
         // Navigate to edit page
-        window.location.href = `/edit-expense/${expenseId}`;
+        navigate(`/expense/${expenseId}/edit`);
     }
 
     function handleDelete(expenseId) {

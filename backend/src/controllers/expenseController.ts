@@ -53,45 +53,61 @@ export const getExpenses = async (request: Request, response: Response, next: Ne
   }
 };
 
-export const getExpenseById = (req: Request, res: Response, next: NextFunction) => {
+export const getExpenseById = async (request: Request, response: Response, next: NextFunction) => {
   try {
-    if (!req.params.id) {
-      res.status(400).json({ message: 'Item ID is required' });
+    if (!request.params.id) {
+      response.status(400).json({ message: 'Item ID is required' });
       return;
     }
-    const id = parseInt(req.params.id, 10);
-    // const item = items.find((i) => i.id === id);
-    // if (!item) {
-    //   res.status(404).json({ message: 'Item not found' });
-    //   return;
-    // }
-    // res.json(item);
+    const id = parseInt(request.params.id);
+
+    const expense = await expenseRepository.findOneBy({ id });
+    if (!expense) {
+      response.status(404).json({ message: 'Expense not found' });
+      return;
+    }
+
+    response.json(expense);
   } catch (error) {
     next(error);
   }
 };
 
-export const updateExpense = (req: Request, res: Response, next: NextFunction) => {
+export const updateExpense = async (request: Request, response: Response, next: NextFunction) => {
   try {
-    if (!req.params.id) {
-      res.status(400).json({ message: 'Item ID is required' });
+    // update an expense using id, name, price from request
+
+    // make sure the user is logged in
+    const userId = request.session.userId;
+    if (!userId) {
+      return response.status(401).json({ message: "Not logged in" });
+    }
+
+    // verify expense belongs to user
+    if (!request.params.id) {
+      response.status(400).json({ message: 'Item ID is required' });
       return;
     }
-    const id = parseInt(req.params.id, 10);
-    const { name } = req.body;
-    if (!name) {
-      res.status(400).json({ message: 'Item name is required' });
-      return;
+    const id = parseInt(request.params.id);
+
+    const expenseToEdit = await expenseRepository.findOne({
+      where: { id },
+      relations: ["user_id"],
+    });
+    if (!expenseToEdit || expenseToEdit.user_id.id !== userId) {
+      return response.status(403).json({ message: "Forbidden" });
     }
-    // const itemIndex = items.findIndex((i) => i.id === id);
-    // if (itemIndex === -1) {
-    //   res.status(404).json({ message: 'Item not found' });
-    //   return;
-    // }
-    // if (items[itemIndex]) {
-    //   items[itemIndex].name = name;
-    // }
-    // res.json(items[itemIndex]);
+
+    // get the params from the request body
+    const { name, price } = request.body;
+
+    // update the expense
+    expenseToEdit.name = name ?? expenseToEdit.name;
+    expenseToEdit.price = price ?? expenseToEdit.price;
+
+    await expenseRepository.save(expenseToEdit);
+
+    response.json(expenseToEdit);
   } catch (error) {
     next(error);
   }
