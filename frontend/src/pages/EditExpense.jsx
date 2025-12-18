@@ -8,12 +8,14 @@ const EditExpense = () => {
     const { id } = useParams();
     const [name, setName] = useState(location.state?.name ?? "");
     const [price, setPrice] = useState(location.state?.price ?? "");
+    const [date, setDate] = useState(location.state?.date ?? "");
 
     useEffect(() => {
         axios.get(`http://localhost:3000/api/expense/${id}`, { withCredentials: true })
             .then((response) => {
                 setName(response.data.name);
                 setPrice(response.data.price);
+                setDate(response.data.date);
             })
             .catch((error) => {
                 console.error("Error fetching expenses data:", error);
@@ -26,6 +28,7 @@ const EditExpense = () => {
         const formData = new FormData(event.target);
         const name = formData.get("name");
         const price = formData.get("price");
+        const date = formData.get("date");
 
         if (name == "") {
             alert("Name is required");
@@ -41,7 +44,8 @@ const EditExpense = () => {
         axios
             .put(`http://localhost:3000/api/expense/${id}`, {
                 name,
-                price
+                price,
+                date
             }, {
                 withCredentials: true
             })
@@ -50,7 +54,7 @@ const EditExpense = () => {
             })
             .catch((error) => {
                 alert("Update failed" + error);
-            });
+        });
     }
 
     return (
@@ -70,6 +74,13 @@ const EditExpense = () => {
                         placeholder="Price"
                         name="price"
                         onChange={e => setPrice(e.target.value)}
+                    />
+                    <input
+                        value={date}
+                        type="date"
+                        placeholder="Date"
+                        name="date"
+                        onChange={e => setDate(e.target.value)}
                     />
                     <button type="submit">Save</button>
                 </form>

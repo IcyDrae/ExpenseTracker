@@ -6,10 +6,10 @@ const expenseRepository = database.AppDataSource.getRepository(Expense);
 
 export const createExpense = async (request: Request, response: Response, next: NextFunction) => {
   try {
-    const { name, price } = request.body;
+    const { name, price, date } = request.body;
 
-    if (!name || !price) {
-      response.status(400).json({ message: 'Name and price are required' });
+    if (!name || !price || !date) {
+      response.status(400).json({ message: 'Name, price and date are required' });
       return;
     }
 
@@ -31,7 +31,7 @@ export const createExpense = async (request: Request, response: Response, next: 
     const expense = expenseRepository.create({
       name,
       price,
-      date: today,
+      date: date,
       user_id: user,
       categories: [],
     });
@@ -99,11 +99,12 @@ export const updateExpense = async (request: Request, response: Response, next: 
     }
 
     // get the params from the request body
-    const { name, price } = request.body;
+    const { name, price, date } = request.body;
 
     // update the expense
     expenseToEdit.name = name ?? expenseToEdit.name;
     expenseToEdit.price = price ?? expenseToEdit.price;
+    expenseToEdit.date = date ?? expenseToEdit.date;
 
     await expenseRepository.save(expenseToEdit);
 

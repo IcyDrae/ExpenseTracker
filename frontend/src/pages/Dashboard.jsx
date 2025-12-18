@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import "./Dashboard.css";
+import ExpensesList from '../components/ExpensesList';
 
 const Dashboard = () => {
     const [expenses, setExpenses] = useState([]);
@@ -23,6 +24,7 @@ const Dashboard = () => {
         const formData = new FormData(event.target);
         const name = formData.get("name");
         const price = formData.get("price");
+        const date = formData.get("date");
 
         if (name == "") {
             alert("Name is required");
@@ -39,6 +41,7 @@ const Dashboard = () => {
             .post("http://localhost:3000/api/expense", {
                 name: name,
                 price: price,
+                date: date
             },
             {
                 withCredentials: true
@@ -66,8 +69,12 @@ const Dashboard = () => {
             })
             .catch((error) => {
                 alert("Deleting expense failed. Please try again." + error);
-            });
+        });
     }
+
+    const total = expenses.reduce((sum, expense) => {
+        return sum + Number(expense.price);
+    }, 0);
 
     return (
         <div className="dashboard-container">
@@ -79,25 +86,20 @@ const Dashboard = () => {
                 <form onSubmit={createExpense}>
                     <input name="name" placeholder="Name" />
                     <input name="price" placeholder="Price" />
+                    <input name="date" type="date" placeholder="Date"/>
                     <button type="submit">Create</button>
                 </form>
             </div>
 
             { expenses?.length === 0 && <p>No expenses found</p> }
 
-            <div className="expenses-list">
-                {expenses.map(expense => (
-                    <div className="expense-card" key={expense.id}>
-                        <p>Name: {expense.name}</p>
-                        <p>Price: {expense.price}</p>
-                        <p>Date created: {expense.date}</p>
-                        <div className="expense-card-buttons">
-                            <button onClick={() => handleEdit(expense.id)}>Edit</button>
-                            <button onClick={() => handleDelete(expense.id)}>Delete</button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+            <h3>Your total expenses: { total }</h3>
+
+            <ExpensesList
+                expenses={expenses}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+            />
         </div>
     );
 };
