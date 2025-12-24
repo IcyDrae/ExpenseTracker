@@ -3,9 +3,10 @@ import cors from 'cors';
 import itemRoutes from './routes/itemRoutes';
 import authRoutes from './routes/authRoutes';
 import expenseRoutes from './routes/expenseRoutes';
+import categoryRoutes from './routes/categoryRoutes';
 import { errorHandler } from './middlewares/errorHandler';
 import "reflect-metadata"
-import database from './database';
+import database from './database/database';
 import session from "express-session";
 
 const app = express();
@@ -35,6 +36,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/expense', expenseRoutes);
+app.use('/api/category', categoryRoutes);
 app.use('/api/items', itemRoutes);
 
 // Initialize database connection

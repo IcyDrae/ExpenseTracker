@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
-import { Expense, User } from '../models';
-import database from '../database';
+import { Expense, User, Category } from '../models';
+import database from '../database/database';
+import { In } from "typeorm";
 
 const expenseRepository = database.AppDataSource.getRepository(Expense);
 
@@ -46,7 +47,9 @@ export const createExpense = async (request: Request, response: Response, next: 
 export const getExpenses = async (request: Request, response: Response, next: NextFunction) => {
   try {
     // make database call to get expenses
-    const expenses = await expenseRepository.find();
+    const expenses = await expenseRepository.find({
+      relations: ["categories"],
+    });
     response.json(expenses);
   } catch (error) {
     next(error);
@@ -61,7 +64,10 @@ export const getExpenseById = async (request: Request, response: Response, next:
     }
     const id = parseInt(request.params.id);
 
-    const expense = await expenseRepository.findOneBy({ id });
+    const expense = await expenseRepository.findOne({
+      where: { id },
+      relations: ["categories"],
+    });
     if (!expense) {
       response.status(404).json({ message: 'Expense not found' });
       return;
@@ -75,8 +81,6 @@ export const getExpenseById = async (request: Request, response: Response, next:
 
 export const updateExpense = async (request: Request, response: Response, next: NextFunction) => {
   try {
-    // update an expense using id, name, price from request
-
     // make sure the user is logged in
     const userId = request.session.userId;
     if (!userId) {
@@ -92,19 +96,32 @@ export const updateExpense = async (request: Request, response: Response, next: 
 
     const expenseToEdit = await expenseRepository.findOne({
       where: { id },
-      relations: ["user_id"],
+      relations: ["user_id", "categories"],
     });
     if (!expenseToEdit || expenseToEdit.user_id.id !== userId) {
       return response.status(403).json({ message: "Forbidden" });
     }
 
     // get the params from the request body
-    const { name, price, date } = request.body;
+    const { name, price, date, categoryId } = request.body;
 
     // update the expense
     expenseToEdit.name = name ?? expenseToEdit.name;
     expenseToEdit.price = price ?? expenseToEdit.price;
     expenseToEdit.date = date ?? expenseToEdit.date;
+
+    const categoryRepository = database.AppDataSource.getRepository(Category);
+    if (categoryId) {
+      const category = await categoryRepository.findOne({
+        where: { id: Number(categoryId) },
+      });
+
+      if (!category) {
+        return response.status(404).json({ message: "Category not found" });
+      }
+
+      expenseToEdit.categories = [category];
+    }
 
     await expenseRepository.save(expenseToEdit);
 

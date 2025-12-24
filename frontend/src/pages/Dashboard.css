@@ -39,3 +39,10 @@ html {
     margin-top: 10px;
 }
 
+select {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    background-color: #1a1a1a;
+}
+

@@ -1,7 +1,8 @@
 import mysql from "mysql2/promise";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import * as Models from "./models";
+import * as Models from "../models";
+import MigrateCategories from "./1678901234567-migrate-categories";
 
 const dbName = "expense_tracker";
 
@@ -27,6 +28,7 @@ const AppDataSource = new DataSource({
     entities: Object.values(Models),
     synchronize: true,
     logging: false,
+    migrations: [MigrateCategories],
 })
 
 // to initialize the initial connection with the database, register all entities
@@ -37,7 +39,8 @@ export default {
     InitDatabase: async function() {
         try {
             await createDatabaseIfNotExists();
-            await AppDataSource.initialize()
+            await AppDataSource.initialize();
+            await AppDataSource.runMigrations();
         } catch (error) {
             console.log(error)
         }

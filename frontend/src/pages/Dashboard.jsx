@@ -4,9 +4,12 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import "./Dashboard.css";
 import ExpensesList from '../components/ExpensesList';
+import CreateExpense from '../components/CreateExpense';
+import Categories from '../components/Categories';
 
 const Dashboard = () => {
     const [expenses, setExpenses] = useState([]);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -60,6 +63,11 @@ const Dashboard = () => {
     }
 
     function handleDelete(expenseId) {
+        const confirmed = window.confirm("Are you sure you want to delete this expense?");
+        if (!confirmed) {
+            return;
+        }
+
         axios
             .delete(`http://localhost:3000/api/expense/${expenseId}`, {
                 withCredentials: true
@@ -72,33 +80,34 @@ const Dashboard = () => {
         });
     }
 
-    const total = expenses.reduce((sum, expense) => {
-        return sum + Number(expense.price);
-    }, 0);
+    const filteredExpenses = selectedCategoryId
+        ? expenses.filter(expense =>
+            expense.categories?.some(cat => cat.id === selectedCategoryId)
+            )
+        : expenses;
+
+     const total = filteredExpenses.reduce(
+            (sum, expense) => sum + Number(expense.price),
+            0);
 
     return (
         <div className="dashboard-container">
             <h3 className="dashboard-header">Welcome to your dashboard! Here you can track your expenses.</h3>
 
-            <div className="create-expense-container">
-                <h4>Create expense</h4>
+            <CreateExpense
+                createExpense={ createExpense }
+            />
 
-                <form onSubmit={createExpense}>
-                    <input name="name" placeholder="Name" />
-                    <input name="price" placeholder="Price" />
-                    <input name="date" type="date" placeholder="Date"/>
-                    <button type="submit">Create</button>
-                </form>
-            </div>
-
-            { expenses?.length === 0 && <p>No expenses found</p> }
-
-            <h3>Your total expenses: { total }</h3>
+            <Categories
+                selectedCategoryId={selectedCategoryId}
+                onSelectCategory={setSelectedCategoryId}
+            />
 
             <ExpensesList
-                expenses={expenses}
+                expenses={filteredExpenses}
                 handleEdit={handleEdit}
                 handleDelete={handleDelete}
+                total={total}
             />
         </div>
     );

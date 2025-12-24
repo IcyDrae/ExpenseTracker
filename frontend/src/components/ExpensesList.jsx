@@ -1,20 +1,27 @@
 import React from 'react';
 
-function ExpensesList({ expenses, handleEdit, handleDelete }) {
+function ExpensesList({ expenses, handleEdit, handleDelete, total }) {
     return (
-        <div className="expenses-list">
-            {expenses.map(expense => (
-                <div className="expense-card" key={expense.id}>
-                    <p>Name: {expense.name}</p>
-                    <p>Price: {expense.price}</p>
-                    <p>Date created: {expense.date}</p>
-                    <div className="expense-card-buttons">
-                        <button onClick={() => handleEdit(expense.id)}>Edit</button>
-                        <button onClick={() => handleDelete(expense.id)}>Delete</button>
+        <>
+            { expenses?.length === 0 && <p>No expenses found</p> }
+
+            <h3>Your total expenses: { total }</h3> 
+
+            <div className="expenses-list">
+                {expenses.map(expense => (
+                    <div className="expense-card" key={expense.id}>
+                        <p>Name: {expense.name}</p>
+                        <p>Price: {expense.price}</p>
+                        <p>Date created: {expense.date}</p>
+                        <p>Category: { expense.categories?.[0]?.name ?? "None" }</p>
+                        <div className="expense-card-buttons">
+                            <button onClick={() => handleEdit(expense.id)}>Edit</button>
+                            <button onClick={() => handleDelete(expense.id)}>Delete</button>
+                        </div>
                     </div>
-                </div>
-            ))}
-        </div>
+                ))}
+            </div>
+        </>
     );
 }
 

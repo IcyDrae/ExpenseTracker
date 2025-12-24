@@ -7,9 +7,6 @@ export class Category {
     @PrimaryGeneratedColumn()
     id!: number
 
-    @ManyToOne(() => User, user => user.categories, { nullable: false })
-    user_id!: User
-
     @Column({nullable: false})
     name!: string
 

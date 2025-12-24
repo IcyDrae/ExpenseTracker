@@ -26,9 +26,6 @@ export class User {
     @OneToMany(() => Expense, expense => expense.user_id)
     expenses!: Expense[]
 
-    @OneToMany(() => Category, category => category.user_id)
-    categories!: Category[]
-
     @OneToMany(() => Trend, trend => trend.user_id)
     trends!: Category[]
 }

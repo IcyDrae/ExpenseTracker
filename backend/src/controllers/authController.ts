@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import database from "../database";
+import database from "../database/database";
 import { User } from "../models/User";
 import bcrypt from "bcrypt";
 
